@@ -1,7 +1,12 @@
 import React from 'react';
+import {createStore,combineReducers} from "redux"
+import {Provider} from "react-redux"
 import logo from './logo.svg';
 import './QuizApp.css';
-import Questions from './Questions';
+import {Questions, questionsReducer} from './Questions';
+import {Game, gameReducer,gameStates, emptyGame} from "./Game"
+import {storage} from "./Storage"
+
 import {
   BrowserRouter as Router,
   Switch,
@@ -9,43 +14,70 @@ import {
   Link
 } from "react-router-dom";
 
-function QuizApp() {
+const pages = {
+  home:1,
+  game:2,
+  questions:3
+};
+
+let emptyState = {
+  questions:[],
+  game:emptyGame(),
+  currentPage:pages.home
+}
+
+var store = createStore(rootReducer);
+var saveCalled = 0;
+store.subscribe(() => {
+  storage.save(store.getState());
+  console.log("Save called " + (++saveCalled));
+});
+
+function rootReducer(state,action){
+    if(state === undefined){
+      let initialState = storage.load();
+      if(!initialState){
+        initialState = emptyState;
+      }      
+      return initialState;
+    }
+    let newState = {...state};  
+    newState.questions = questionsReducer(state.questions,action);
+    newState = gameReducer(newState,action)
+   
+    return newState;
+}
+
+
+function QuizApp(props) {
   return (
-    <Router>
-      <div>
-        {/* <nav>
-          <ul>
-            <li>
-              <Link to="/">Home</Link>
-            </li>
-            <li>
-              <Link to="/about">About</Link>
-            </li>
-            <li>
-              <Link to="/users">Users</Link>
-            </li>
-          </ul>
-        </nav> */}
-        <Switch>
-          <Route path="/game">
-            <Game />
-          </Route>
-          <Route path="/questions">
-            <Questions />
-          </Route>
-          <Route path="/">
-            <Game />
-          </Route>
-        </Switch>
-      </div>
-    </Router>
+    <Provider store={store}>
+      <Router>
+        <div>
+            <Switch> 
+              <Route path="/game">
+                  <Game/>
+              </Route>
+              <Route path="/questions">
+                  <Questions/>         
+              </Route>
+              <Route path="/">
+              <nav>
+                <ul>
+                  <li>
+                    <Link to="/questions" >Questions</Link>
+                  </li>
+                  <li>
+                    <Link to="/game">Game</Link>
+                  </li>
+                </ul>
+              </nav>
+              </Route>
+            </Switch>
+        </div>
+      </Router>
+    </Provider>   
   );
 }
 
-
-function Game() {
-  return <h2>Game</h2>;
-}
-
-
-export default QuizApp;
+export {store,QuizApp};

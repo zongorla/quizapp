@@ -1,71 +1,47 @@
 import React from 'react';
+import Redux from "redux";
+import { Provider } from 'react-redux'
+import {connect} from "react-redux"
 import './Questions.css';
+const QUESTIONS_ADD = "QUESTIONS_ADD"
+const QUESTIONS_DELETE = "QUESTIONS_DELETE"
 
-model = {
-
-}
-
-class QuizApp{
-
-  constructor(){
-      this.model = {
-        questions:[{
-          text:"Elso kerdes ?",
-          answers:["a","b","c","d"],
-          correct:"a"
-        },{
-          text:"Masodik kerder kerdes ami nagyon hosszu de tenyleg,Masodik kerder kerdes ami nagyon hosszu de tenyleg,Masodik kerder kerdes ami nagyon hosszu de tenyleg,Masodik kerder kerdes ami nagyon hosszu de tenyleg?Masodik kerder kerdes ami nagyon hosszu de tenyleg,Masodik kerder kerdes ami nagyon hosszu de tenyleg,Masodik kerder kerdes ami nagyon hosszu de tenyleg,Masodik kerder kerdes ami nagyon hosszu de tenyleg?",
-          answers:["a","b","c","d"],
-          correct:"d"
-        },{
-          text:"Harmadik kerdes ?",
-          answers:["a","b","c","d"],
-          correct:"b"
-        }]
-      }
-  }
-
-  getState(){
-
-  }
-
-  handleIntent(){
-
-  }
-
-}
-
-
-class Questions extends React.Component {
-
-  constructor(props){
-    super(props)
-    this.questions = props.questions;
-    this.deleteQuestion = this.deleteQuestion.bind(this);
-    this.addQuestion = this.addQuestion.bind(this);
-  }
-
-
-  deleteQuestion(question){
-    this.setState({
-        questions: this.state.questions.filter(x => x.text !== question.text)
-    });
-  }
-
-  addQuestion(question){
-    this.state.questions.push(question);
-    this.setState({
-        questions: this.state.questions
-    });
-  }
-  
-  render(){
-    return  <div>
-        <QuestionList {...this.state} onDeleteClicked={this.deleteQuestion}></QuestionList>
-        <NewQuestionForm  onQuestionSubmitted={this.addQuestion} ></NewQuestionForm>
-    </div>;
+const questionsReducer =  (questions, action) => {
+  switch(action.type){
+    case QUESTIONS_ADD:{
+      return [...questions,action.question];
+    }
+    case QUESTIONS_DELETE:{
+      return questions.filter(x => x.text !== action.question.text);
+    }
+    default:
+      return questions;
   }
 }
+
+const mapStateToProps = function (state){
+  return {
+    questions:state.questions
+  }
+};
+
+const mapDispatchToProps = dispatch => ({
+  addQuestion: question => dispatch({
+    type:QUESTIONS_ADD,
+    question:question
+  }),
+  deleteQuestion: question => dispatch({
+    type:QUESTIONS_DELETE,
+    question:question
+  })
+});
+
+
+const Questions =  connect(mapStateToProps,mapDispatchToProps)((props) =>
+     (<div>
+        <QuestionList questions={props.questions} onDeleteClicked={props.deleteQuestion}></QuestionList>
+        <NewQuestionForm  onQuestionSubmitted={props.addQuestion} ></NewQuestionForm>
+</div>));
 
 
 function QuestionList({questions, onDeleteClicked}){
@@ -81,17 +57,18 @@ function Question({question,onDeleteClicked}){
   return <li className="list-group-item">{question.text}<button onClick={() => onDeleteClicked(question)} className="btn delete-button btn-primary">X</button></li>
 }
 
+const emptyAnswer = () => ({ text:"", correct:false })
+const emptyFromState = () => ({
+  text:"",
+  answers:[emptyAnswer(),emptyAnswer(),emptyAnswer(),emptyAnswer()],
+})
+
 class NewQuestionForm extends React.Component{  
-  emptyState = {
-    text:"",
-    answers:["","","",""],
-    isCorrect:[false,false,false,false]
-  }
 
   constructor(props){ 
     super(props);
     this.onQuestionSubmitted = props.onQuestionSubmitted;
-    this.state = this.emptyState;
+    this.state = emptyFromState();
 
     this.handleOptionChange = this.handleOptionChange.bind(this);
     this.handleQuestionChange = this.handleQuestionChange.bind(this);
@@ -100,16 +77,14 @@ class NewQuestionForm extends React.Component{
   }
 
   handleIsCorrectChange(event, index){
-    let isCorrect = [...this.emptyState.isCorrect]
-    isCorrect[index] = true;
-    this.setState({
-      isCorrect:isCorrect
-    });
+    const answers = [...this.state.answers]
+    answers[index].correct = true;
+    this.setState({answers: answers});
   }
 
   handleOptionChange(event, index) {
     const answers = [...this.state.answers]
-    answers[index] = event.target.value;
+    answers[index].text = event.target.value;
     this.setState({answers: answers});
   }
 
@@ -121,21 +96,21 @@ class NewQuestionForm extends React.Component{
 
   handleSubmit(event) {
     this.onQuestionSubmitted(this.state);
-    this.setState(this.emptyState);
+    this.setState(emptyFromState());
     event.preventDefault();
   }
 
   render(){
           return <form onSubmit={this.handleSubmit}>
             <h3>New question</h3>
-            <div className="form-group ">
+            <div className="form-group">
               <label htmlFor="newQuestionText">The new question</label>
               <input type="text" className="form-control" id="newQuestionText" value={this.state.text} placeholder="Enter question" onChange={this.handleQuestionChange}></input>
             </div>
-            {this.state.answers.map((value,index) =>  (
+            {this.state.answers.map((answer,index) =>  (
              <div className="form-group form-inline"  key={index}>
-               <IsCorrect  handleChange={this.handleIsCorrectChange} isCorrect={this.state.isCorrect[index]} index={index} ></IsCorrect> 
-               <Option handleChange={this.handleOptionChange} value={value} isCorrect={this.state.isCorrect[index]} index={index} ></Option>
+               <IsCorrect  handleChange={this.handleIsCorrectChange} isCorrect={answer.correct} index={index} ></IsCorrect> 
+               <Option handleChange={this.handleOptionChange} value={answer.text} index={index} ></Option>
             </div>))}
             <button type="submit" className="btn btn-primary">Submit</button>
           </form>
@@ -160,4 +135,5 @@ function IsCorrect({handleChange,index,isCorrect}){
     </div>
 }
 
-export default Questions;
+export  {questionsReducer,Questions};
+
