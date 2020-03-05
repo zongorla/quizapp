@@ -3,8 +3,8 @@ import {createStore,combineReducers} from "redux"
 import {Provider} from "react-redux"
 import logo from './logo.svg';
 import './QuizApp.css';
+import {Game, gameReducer, emptyGame} from "./Game"
 import {Questions, questionsReducer} from './Questions';
-import {Game, gameReducer,gameStates, emptyGame} from "./Game"
 import {storage} from "./Storage"
 
 import {
