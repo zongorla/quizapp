@@ -1,4 +1,7 @@
 ## How to run
+
+You can access an instance of the app [here](https://etc.boclak.hu/). No uptime guarantee :) 
+
 ### with docker
 execute script [buildandrun.sh]
 
