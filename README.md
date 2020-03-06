@@ -2,7 +2,7 @@
 ### with docker
 execute script [buildandrun.sh]
 
-this will build the container and runs it.
+this will build the container and run it.
 
 After start you can access the site at http://localhost:3000
 
