@@ -7,13 +7,13 @@ function GameMenu(props){
   return ( <form onSubmit={props.startGame}>
     <div className="form-group">
       <div className="form-group row">
-        <input type="text" className="form-control" id="player-name" placeholder="Enter your name" value={props.game.player} onChange={props.handleChange} required></input>
+        <input type="text" className="form-control" id="player-name" placeholder="Enter your name" value={props.game.player} onChange={props.handleChange} required maxlength="40"></input>
       </div>
       <div className="form-group row">
         <button type="submit" className="btn btn-primary btn-lg btn-block">Start a new game</button>
       </div>
       <div className={noQuestions?"":"hidden"}>
-        <p className='lead text-warning'>Oups! There are no questions in the game. Add some before starting a new game</p>
+        <p className='lead text-warning'>Oups! There are no questions in the game. Add some before starting a new game.</p>
       </div>
     </div>
   </form>)
@@ -22,10 +22,10 @@ function GameMenu(props){
 function ActiveGame(props){
   const currentQuestion = props.game.currentQuestion;
   const question = props.game.questions[currentQuestion];
-  return <div class="col-12 no-gutters">
+  return <div className="col-12 no-gutters">
             <GameInfo {...props.game}></GameInfo>
             <div className="row question-area">
-              <div class="col-12">
+              <div className="col-12">
                   <p className="text-left question-text">Question {currentQuestion+1}:<i> {question.text}</i></p>
                   <ul className="list-group">
                           {question.answers.map((answer,index) => <Answer key={index} answer={answer} selectAnswer={props.selectAnswer} answerSent={props.game.answerSent}></Answer>) }
@@ -56,13 +56,13 @@ function GameControls(props){
     button = <button className="btn btn-block" disabled={!props.game.answerSelected} onClick={props.sendAnswer}>Send answer</button>
   }
   return <div className="row">
-        <div className="col-6">
-          {button}
+          <div className="col-6">
+            {button}
+          </div>
+          <div className="col-6">
+            <button className="btn btn-block" onClick={props.endGame}>End Game</button>
+          </div>
         </div>
-        <div className="col-6">
-          <button className="btn btn-block" onClick={props.endGame}>End Game</button>
-        </div>
-      </div>
 }
 
 function Answer({answer,selectAnswer,answerSent}){
@@ -73,13 +73,13 @@ function Answer({answer,selectAnswer,answerSent}){
   return <li  
     className={classNames.join(" ")} 
     onClick={event => selectAnswer(event,answer)}>
-      {answer.text}
+    {answer.text}
   </li>
 }
 
 function GameSummary(props){
   return <div>
-    <p>Congratulations {props.game.player} your score was {props.game.points}/{props.game.questions.length} </p>
+    <p className="text-info lead">You answered {props.game.points} out of {props.game.questions.length} question(s) correctly.</p>
     <GameMenu {...props}></GameMenu>
   </div>
 }

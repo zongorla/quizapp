@@ -4,12 +4,14 @@ execute script [buildandrun.sh]
 
 this will build the container and runs it.
 
-After start you can access the site at http://localhost:30001
+After start you can access the site at http://localhost:3001
 
 ### locally
 Install node(I used 10.19.0) and npm
 
 Run [npm start]
+
+After start you can access the site at http://localhost:3000
 
 To run the tests:
 

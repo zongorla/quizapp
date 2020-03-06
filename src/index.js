@@ -1,9 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import {QuizApp} from './QuizApp';
+import {QuizApp} from './components/QuizApp';
 import {storage} from "./Storage"
-import {createGameStore} from "./GameState"
+import {createGameStore} from "./components/GameState"
 import * as serviceWorker from './serviceWorker';
 import {Provider} from "react-redux"
 

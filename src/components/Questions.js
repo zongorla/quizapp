@@ -1,8 +1,5 @@
 import React from 'react';
-import Redux, { bindActionCreators } from "redux";
-import { Provider } from 'react-redux'
 import {connect} from "react-redux"
-import {NotificationContainer, NotificationManager} from 'react-notifications';
 import './Questions.css';
 const QUESTIONS_ADD = "QUESTIONS_ADD"
 const QUESTIONS_DELETE = "QUESTIONS_DELETE"
@@ -10,9 +7,11 @@ const QUESTIONS_DELETE = "QUESTIONS_DELETE"
 const questionsReducer =  (questionEditor, action) => {
   switch(action.type){
     case QUESTIONS_ADD:{
-      // if(questionEditor.questions.find(q => q.text.trim() === action.question.text.trim())){
-      //   NotificationManager.error('Error message', 'Question already exists!', 3000);
-      // }
+      let text = action.question.text.trim();
+      if(!text.endsWith("?")){
+        text+="?"
+      }
+      action.question.text = text;
       questionEditor.questions = [...questionEditor.questions,action.question];
       return {...questionEditor};
     }
@@ -49,17 +48,7 @@ const Questions = connect(mapStateToProps,mapDispatchToProps)((props) =>
         <NewQuestionForm  onQuestionSubmitted={props.addQuestion} ></NewQuestionForm>
       </div>));
 
-
-// function QuestionList({questions, onDeleteClicked}){
-//   return <div>
-//           <h3>Questions</h3>
-//           <ul className="list-group question-list">
-//             {questions.map((question) => <Question question={question} onDeleteClicked={onDeleteClicked} key={question.text}></Question>)}
-//           </ul>
-//         </div>;
-// }
 function QuestionList({questions, onDeleteClicked}){
-  let questionList;
   if(questions.length !== 0){
     let questionList = questions.map((question) => <Question question={question} onDeleteClicked={onDeleteClicked} key={question.text}></Question>)
     return <div >
@@ -153,8 +142,7 @@ class NewQuestionForm extends React.Component{
           return <form onSubmit={this.handleSubmit} className="question-from">
             <h3>New question</h3>
             <div className="form-group row">
-              {/* <label htmlFor="newQuestionText">The new question</label> */}
-              <input type="text" 
+              <textarea 
                 className="form-control" 
                 id="newQuestionText" 
                 value={this.state.text} 
@@ -163,7 +151,7 @@ class NewQuestionForm extends React.Component{
                 onChange={this.handleQuestionChange}
                 onInput={this.handleOnInput} 
                 required
-                autoComplete="off" ></input>
+                autoComplete="off" ></textarea>
             </div>
             {this.state.answers.map((answer,index) =>  (
              <div className="form-group form-inline row"  key={index}>

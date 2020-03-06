@@ -1,5 +1,3 @@
-import { isUndefined } from "util";
-
 const key = "gameData"
 const defaultValue = undefined;
 const storage = {
@@ -29,4 +27,4 @@ const storage = {
     }
 }
 
-export { storage}
+export {storage}

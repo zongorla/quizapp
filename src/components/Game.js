@@ -1,7 +1,6 @@
 import React from 'react';
 import {connect} from "react-redux"
 import {cloneDeep} from 'lodash'
-import './Game.css';
 import {GameMenu, ActiveGame, GameSummary} from "./GameComponents"
 
 

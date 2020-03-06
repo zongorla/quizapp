@@ -1,7 +1,6 @@
-import React from 'react';
-import { render } from '@testing-library/react';
 import {createGameStore,emptyState} from './GameState';
 import cloneDeep from "lodash"
+
 const mockStorage = (initalstate=null) => ({
   state: initalstate,
   save: function(newState){

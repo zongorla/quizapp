@@ -11,17 +11,17 @@ let emptyState = () => ({
     game:emptyGame()
   });
   
-function createGameStore(storage){
+function createGameStore(persistentStorage){
     var store = createStore(rootReducer);
     var saveCalled = 0;
     store.subscribe(() => {
-        storage.save(store.getState());
+        persistentStorage.save(store.getState());
         console.log("Save called " + (++saveCalled));
     });
 
     function rootReducer(state,action){
         if(state === undefined){
-            let initialState = storage.load(validateState);
+            let initialState = persistentStorage.load(validateState);
             if(!initialState){
                 initialState = emptyState();
             }      
