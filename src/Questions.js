@@ -1,27 +1,34 @@
 import React from 'react';
-import Redux from "redux";
+import Redux, { bindActionCreators } from "redux";
 import { Provider } from 'react-redux'
 import {connect} from "react-redux"
+import {NotificationContainer, NotificationManager} from 'react-notifications';
 import './Questions.css';
+import { act } from 'react-dom/test-utils';
 const QUESTIONS_ADD = "QUESTIONS_ADD"
 const QUESTIONS_DELETE = "QUESTIONS_DELETE"
 
-const questionsReducer =  (questions, action) => {
+const questionsReducer =  (questionEditor, action) => {
   switch(action.type){
     case QUESTIONS_ADD:{
-      return [...questions,action.question];
+      // if(questionEditor.questions.find(q => q.text.trim() === action.question.text.trim())){
+      //   NotificationManager.error('Error message', 'Question already exists!', 3000);
+      // }
+      questionEditor.questions = [...questionEditor.questions,action.question];
+      return {...questionEditor};
     }
     case QUESTIONS_DELETE:{
-      return questions.filter(x => x.text !== action.question.text);
+      questionEditor.questions = questionEditor.questions.filter(q => q !== action.question);
+      return {...questionEditor};
     }
     default:
-      return questions;
+      return questionEditor;
   }
 }
 
 const mapStateToProps = function (state){
   return {
-    questions:state.questions
+    questions: state.questionEditor.questions
   }
 };
 
@@ -37,11 +44,11 @@ const mapDispatchToProps = dispatch => ({
 });
 
 
-const Questions =  connect(mapStateToProps,mapDispatchToProps)((props) =>
-     (<div>
+const Questions = connect(mapStateToProps,mapDispatchToProps)((props) =>
+     (<div >
         <QuestionList questions={props.questions} onDeleteClicked={props.deleteQuestion}></QuestionList>
         <NewQuestionForm  onQuestionSubmitted={props.addQuestion} ></NewQuestionForm>
-</div>));
+      </div>));
 
 
 function QuestionList({questions, onDeleteClicked}){
@@ -74,11 +81,14 @@ class NewQuestionForm extends React.Component{
     this.handleQuestionChange = this.handleQuestionChange.bind(this);
     this.handleIsCorrectChange = this.handleIsCorrectChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleOnInput = this.handleOnInput.bind(this);
   }
 
   handleIsCorrectChange(event, index){
-    const answers = [...this.state.answers]
-    answers[index].correct = true;
+    const answers = this.state.answers.map((answer,i)=> {
+      answer.correct = i ===index;
+      return answer;
+    })
     this.setState({answers: answers});
   }
 
@@ -86,6 +96,26 @@ class NewQuestionForm extends React.Component{
     const answers = [...this.state.answers]
     answers[index].text = event.target.value;
     this.setState({answers: answers});
+  }
+
+  handleOnInput(event){
+    event.target.setCustomValidity("");
+  }
+
+  handleInvalid(event){
+    const setCustomValidity = (message) => {
+      event.target.setCustomValidity("");
+      if (!event.target.validity.valid) {
+        event.target.setCustomValidity(message);
+      }
+    }
+    if(event.target.id && event.target.id.startsWith("radio")){
+      setCustomValidity("Select a correct answer!")
+    } if(event.target.id && event.target.id.startsWith("optiontext")){
+      setCustomValidity("Answer cannot be empty!")
+    } if(event.target.id === "newQuestionText"){
+      setCustomValidity("Question cannot be empty!")
+    }
   }
 
   handleQuestionChange(event) {
@@ -105,12 +135,21 @@ class NewQuestionForm extends React.Component{
             <h3>New question</h3>
             <div className="form-group">
               <label htmlFor="newQuestionText">The new question</label>
-              <input type="text" className="form-control" id="newQuestionText" value={this.state.text} placeholder="Enter question" onChange={this.handleQuestionChange}></input>
+              <input type="text" 
+                className="form-control" 
+                id="newQuestionText" 
+                value={this.state.text} 
+                onInvalid={this.handleInvalid} 
+                placeholder="Enter question" 
+                onChange={this.handleQuestionChange}
+                onInput={this.handleOnInput} 
+                required
+                autoComplete="off" ></input>
             </div>
             {this.state.answers.map((answer,index) =>  (
              <div className="form-group form-inline"  key={index}>
-               <IsCorrect  handleChange={this.handleIsCorrectChange} isCorrect={answer.correct} index={index} ></IsCorrect> 
-               <Option handleChange={this.handleOptionChange} value={answer.text} index={index} ></Option>
+               <IsCorrect {...this}  handleChange={this.handleIsCorrectChange} handleInvalid={this.handleInvalid} isCorrect={answer.correct} index={index} ></IsCorrect> 
+               <Option {...this} handleChange={this.handleOptionChange} handleInvalid={this.handleInvalid} value={answer.text} index={index}  ></Option>
             </div>))}
             <button type="submit" className="btn btn-primary">Submit</button>
           </form>
@@ -118,19 +157,39 @@ class NewQuestionForm extends React.Component{
 }
 
 
-function Option({handleChange, index, value}){
+function Option({handleChange, handleOnInput, handleInvalid, index, value}){
   const inputId = "optiontext" + index;
   const placeholder = "Option " + (index+1);
   return <>
     <label htmlFor={inputId}></label>
-    <input type="text" className="form-control" id={inputId} placeholder={placeholder} value={value} onChange={(event) => handleChange(event,index,"input")}></input>
+    <input  type="text" 
+            className="form-control" 
+            id={inputId}  
+            placeholder={placeholder} 
+            value={value} 
+            onInvalid={handleInvalid} 
+            onInput={handleOnInput} 
+            onChange={(event) => handleChange(event,index,"input")} 
+            required
+            autoComplete="off" >
+    </input>
     </>
 }
 
-function IsCorrect({handleChange,index,isCorrect}){
+function IsCorrect({handleChange, handleInvalid,handleOnInput,index,isCorrect}){
   const radioButtonId = "radio" + index;
   return <div className="custom-control custom-radio">
-      <input type="radio" className="custom-control-input" id={radioButtonId} checked={isCorrect} name="correctOption" onChange={(event) => handleChange(event,index)}></input>
+      <input type="radio" 
+            className="custom-control-input" 
+            id={radioButtonId} 
+            checked={isCorrect} 
+            required 
+            onInvalid={handleInvalid} 
+            onInput={handleOnInput} 
+            value={index} 
+            name="correctOption" 
+            onChange={(event) => handleChange(event,index)}>
+      </input>
       <label className="custom-control-label" htmlFor={radioButtonId}></label>
     </div>
 }

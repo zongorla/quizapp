@@ -5,17 +5,18 @@ import './Game.css';
 import {GameMenu, ActiveGame, GameSummary} from "./GameComponents"
 
 
-const GAME_START = "GAME_START"
-const GAME_INPUTCHANGE = "GAME_INPUTCHANGE"
-const GAME_ANSWERSELECTED = "GAME_ANSWERSENT"
-const GAME_ANSWERSENT = "GAME_ANSWERSELECTED"
-const GAME_NEXTQUESTION = "GAME_NEXTQUESTION"
+const GAME_START = "GAME_START";
+const GAME_INPUTCHANGE = "GAME_INPUTCHANGE";
+const GAME_ANSWERSELECTED = "GAME_ANSWERSENT";
+const GAME_ANSWERSENT = "GAME_ANSWERSELECTED";
+const GAME_NEXTQUESTION = "GAME_NEXTQUESTION";
+const GAME_END = "GAME_END";
 
 const gameStates = {
   menu:1,
   running:2,
   finnished:3
-}
+};
 
 const emptyGame = () => ({
   gameState:gameStates.menu,
@@ -25,89 +26,111 @@ const emptyGame = () => ({
   currentQuestion:0,
   answerSelected:false,
   answerSent:false
-})
+});
+
+const gameReducer = (state, action) => {
+  switch(action.type){
+    case GAME_START:{
+      return startGame(state,state.questionEditor.questions,action);
+    }
+    case GAME_INPUTCHANGE:{
+      return inputChange(state, action);
+    }
+    case GAME_ANSWERSELECTED:{
+      return answerSelected(state, action);
+    }
+    case GAME_ANSWERSENT:{
+      return answerSent(state, action);
+    }
+    case GAME_NEXTQUESTION:{
+      return nextQuestion(state,action);
+    }
+    case GAME_END:{
+      return endGame(state,action);
+    }
+    default:
+      return state;
+  }
+};
+
+
+function startGame(state,questions,action){
+  action.event.preventDefault();
+  state.game = {...state.game};
+  if(questions.length !== 0){
+    state.game.gameState = gameStates.running;
+    state.game.questions = getGameQuestions(questions);
+    state.game.currentQuestion = 0;
+    state.game.points = 0;
+  }
+  return state;
+};
 
 function getGameQuestions(questions){
   questions = cloneDeep(questions);
   questions.forEach( (question) => {
     question.answers.forEach((answer) => {
       answer.selected = false; 
-    })
+    });
   });
   return questions;
 }
 
-function startGame(game,questions,action){
-  action.event.preventDefault();
-  const newGame = {...game}
-  newGame.gameState = gameStates.running;
-  newGame.questions = getGameQuestions(questions);
-  newGame.currentQuestion = 0;
-  newGame.points = 0;
-  return newGame;
+function inputChange(state,action){
+  state.game = {...state.game};
+  state.game.player = action.event.target.value;
+  return state;
 }
 
-
-function endOfGame(state){
-  return state.game.currentQuestion === state.game.questions.length - 1;
-}
-
-const gameReducer =  (state, action) => {
-  switch(action.type){
-    case GAME_START:{
-      state.game = startGame(state.game,state.questions,action);
-      return state;
-    }
-    case GAME_INPUTCHANGE:{
-      state.game = {...state.game}
-      state.game.player = action.event.target.value;
-      return state;
-    }
-    case GAME_ANSWERSELECTED:{
-      if(!state.game.answerSent){
-        state.game.answerSelected = true;
-        const game = {...state.game}
-        const question = game.questions[game.currentQuestion];
-        question.answers = question.answers.map(function(answer){
-          if(answer === action.answer){
-            answer.selected = true;
-          }else{
-            answer.selected = false;
-          }
-          return answer;
-        })
-        state.game = game;
-        return state;
-      }
-      return state;
-    }
-    case GAME_ANSWERSENT:{
-      const game = {...state.game}
-      game.answerSent = true;
-      const question = game.questions[game.currentQuestion];
-      question.answers.forEach(function(answer){
-        if(answer.selected && answer.correct){
-          game.points += 1;
-        }
-      });
-      state.game = game;
-      return state;
-    }
-    case GAME_NEXTQUESTION:{
-      state.game = {...state.game}
-      if(endOfGame(state)){
-        state.game.gameState = gameStates.finnished;
-      }else{
-        state.game.currentQuestion += 1;
-        state.game.answerSelected = false;
-        state.game.answerSent = false;
-        state.game.selectedAnswer = null;
-      }
-      return state;
-    }
-    default:
-      return state;
+function answerSelected(state,action){
+  if(!state.game.answerSent){
+    state.game.answerSelected = true;
+    const game = {...state.game}
+    const question = game.questions[game.currentQuestion];
+    question.answers = question.answers.map(function(answer){
+      answer.selected = answer === action.answer;
+      return answer;
+    })
+    state.game = game;
+    return state;
   }
+  return state;
+}
+
+function answerSent(state,action){
+  const game = {...state.game}
+  game.answerSent = true;
+  const question = game.questions[game.currentQuestion];
+  question.answers.forEach(function(answer){
+    if(answer.selected && answer.correct){
+      game.points += 1;
+    }
+  });
+  state.game = game;
+  return state;
+}
+
+function nextQuestion(state,action){      
+  state.game = {...state.game}
+  if(isEndOfGame(state)){
+    state.game.gameState = gameStates.finnished;
+  }else{
+    state.game.currentQuestion += 1;
+    state.game.answerSelected = false;
+    state.game.answerSent = false;
+    state.game.selectedAnswer = null;
+  }
+  return state;
+}
+
+function endGame(state,action){
+  state.game = {...state.game}
+  state.game.gameState = gameStates.menu;
+  return state;
+}
+
+function isEndOfGame(state){
+  return state.game.currentQuestion === state.game.questions.length - 1;
 }
 
 const mapStateToProps = function (state){
@@ -135,6 +158,9 @@ const mapDispatchToProps = dispatch => ({
   nextQuestion: (event) => dispatch({
     type:GAME_NEXTQUESTION,
     event
+  }),
+  endGame: () => dispatch({
+    type:GAME_END
   })
 });
 

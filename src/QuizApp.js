@@ -1,11 +1,14 @@
 import React from 'react';
 import {createStore,combineReducers} from "redux"
 import {Provider} from "react-redux"
-import logo from './logo.svg';
+
+import 'react-notifications/lib/notifications.css';
 import './QuizApp.css';
+
 import {Game, gameReducer, emptyGame} from "./Game"
 import {Questions, questionsReducer} from './Questions';
 import {storage} from "./Storage"
+
 
 import {
   BrowserRouter as Router,
@@ -21,7 +24,9 @@ const pages = {
 };
 
 let emptyState = {
-  questions:[],
+  questionEditor:{
+    questions:[]
+  },
   game:emptyGame(),
   currentPage:pages.home
 }
@@ -33,16 +38,21 @@ store.subscribe(() => {
   console.log("Save called " + (++saveCalled));
 });
 
+function validateState(state){
+   return (state.questionEditor instanceof Object
+    && state.game instanceof Object)
+}
+
 function rootReducer(state,action){
     if(state === undefined){
-      let initialState = storage.load();
-      if(!initialState){
+      let initialState = storage.load(validateState);
+      if(!initialState ){
         initialState = emptyState;
       }      
       return initialState;
     }
     let newState = {...state};  
-    newState.questions = questionsReducer(state.questions,action);
+    newState.questionEditor = questionsReducer(state.questionEditor,action);
     newState = gameReducer(newState,action)
    
     return newState;
@@ -53,7 +63,16 @@ function QuizApp(props) {
   return (
     <Provider store={store}>
       <Router>
-        <div>
+        <header class="masthead mb-auto">
+          <div class="inner">
+            <h3 class="masthead-brand">Cover</h3>
+            <nav class="nav nav-masthead justify-content-center">
+              <Link className="nav-link active"to="/questions">Edit questions</Link>
+              <Link className="nav-link active"to="/game">Play</Link>
+            </nav>
+          </div>
+        </header>
+        <main role="main" class="inner cover">
             <Switch> 
               <Route path="/game">
                   <Game/>
@@ -62,19 +81,9 @@ function QuizApp(props) {
                   <Questions/>         
               </Route>
               <Route path="/">
-              <nav>
-                <ul>
-                  <li>
-                    <Link to="/questions" >Questions</Link>
-                  </li>
-                  <li>
-                    <Link to="/game">Game</Link>
-                  </li>
-                </ul>
-              </nav>
               </Route>
             </Switch>
-        </div>
+        </main>
       </Router>
     </Provider>   
   );
