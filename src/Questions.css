@@ -1,3 +1,16 @@
 .delete-button {
   float: right;
 }
+
+.question-from{
+  width:100%;
+}
+
+.option-input{
+  width:90%!important;
+}
+
+.question{
+  word-break: break-all;
+  text-align: left;
+}

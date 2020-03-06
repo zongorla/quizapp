@@ -16,14 +16,19 @@ import {
 function GameMenu(props){
   const noQuestions = props.questionEditor.questions.length === 0;
   return ( <form onSubmit={props.startGame}>
-    <h3>Start a new game</h3>
+    {/* <h3 className="cover-heading">Start a new game</h3> */}
     <div className="form-group">
-      <input type="text" className="form-control" id="Name" placeholder="Enter your name" value={props.game.player} onChange={props.handleChange} required></input>
-      <button type="submit" className="btn btn-primary">Start Quiz</button>
-      <div className={noQuestions?"":"hidden"}>
-        <p>There are no questions in the game. Add some before starting a new game</p>
+      <div className="form-group row">
+        {/* <label for="player-name">Player name:</label> */}
+        <input type="text" className="form-control" id="player-name" placeholder="Enter your name" value={props.game.player} onChange={props.handleChange} required></input>
       </div>
-      <button><Link to="/questions" >Add questions</Link></button>
+      <div className="form-group row">
+        <button type="submit" className="btn btn-primary btn-lg btn-block">Start a new game</button>
+      </div>
+      <div className={noQuestions?"":"hidden"}>
+        <p className='lead text-warning'>Oups! There are no questions in the game. Add some before starting a new game</p>
+      </div>
+      {/* <button><Link to="/questions" >Add questions</Link></button> */}
     </div>
   </form>)
 }
@@ -39,14 +44,14 @@ function ActiveGame(props){
       <button onClick={props.endGame}>End Game</button>
     </div>
     <ul>
-          <li>Question {currentQuestion+1}: {question.text}</li>
+          <li className="text-left">Question {currentQuestion+1}: {question.text}</li>
             {question.answers.map((answer,index) => <Answer key={index} answer={answer} selectAnswer={props.selectAnswer} answerSent={props.game.answerSent}></Answer>) }
     </ul>
     </div>
 }
 
 function Answer({answer,selectAnswer,answerSent}){
-  const classNames = [answer.selected?"answer-selected":""];
+  const classNames = ["text-left", answer.selected?"answer-selected":""];
   if(answerSent){
     classNames.push(answer.correct?"correct":"incorrect");
   }

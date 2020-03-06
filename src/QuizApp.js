@@ -63,16 +63,16 @@ function QuizApp(props) {
   return (
     <Provider store={store}>
       <Router>
-        <header class="masthead mb-auto">
+        <header class="masthead">
           <div class="inner">
-            <h3 class="masthead-brand">Cover</h3>
+            <h3 class="masthead-brand">The Quiz</h3>
             <nav class="nav nav-masthead justify-content-center">
               <Link className="nav-link active"to="/questions">Edit questions</Link>
               <Link className="nav-link active"to="/game">Play</Link>
             </nav>
           </div>
         </header>
-        <main role="main" class="inner cover">
+        <main role="main" className="inner cover">
             <Switch> 
               <Route path="/game">
                   <Game/>
@@ -81,6 +81,7 @@ function QuizApp(props) {
                   <Questions/>         
               </Route>
               <Route path="/">
+                  <Game/>
               </Route>
             </Switch>
         </main>

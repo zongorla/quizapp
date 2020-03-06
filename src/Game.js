@@ -62,6 +62,8 @@ function startGame(state,questions,action){
     state.game.questions = getGameQuestions(questions);
     state.game.currentQuestion = 0;
     state.game.points = 0;
+    state.game.answerSelected = false;
+    state.game.answerSent = false;
   }
   return state;
 };
@@ -118,7 +120,6 @@ function nextQuestion(state,action){
     state.game.currentQuestion += 1;
     state.game.answerSelected = false;
     state.game.answerSent = false;
-    state.game.selectedAnswer = null;
   }
   return state;
 }
@@ -132,6 +133,7 @@ function endGame(state,action){
 function isEndOfGame(state){
   return state.game.currentQuestion === state.game.questions.length - 1;
 }
+
 
 const mapStateToProps = function (state){
   return state;
