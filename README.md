@@ -1,3 +1,21 @@
+## How to run
+### with docker
+execute script [buildandrun.sh]
+this will build the container and runs it.
+After start you can access the site at http://localhost:30001
+
+### locally
+Install node(I used 10.19.0) and npm
+Run [npm start]
+
+To run the tests:
+Run [npm test]
+
+
+
+
+
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts

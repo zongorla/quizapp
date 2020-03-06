@@ -1,10 +1,6 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import QuizApp from './QuizApp';
+import {QuizApp, store,emptyState} from './QuizApp';
+import {storage} from "./Storage"
 
-
-test('rootReducer returns initial state', () => {
-  const { getByText } = render(<QuizApp />);
-  const linkElement = getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
-});
+test("",()=>undefined)

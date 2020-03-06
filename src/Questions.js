@@ -59,12 +59,18 @@ const Questions = connect(mapStateToProps,mapDispatchToProps)((props) =>
 //         </div>;
 // }
 function QuestionList({questions, onDeleteClicked}){
-  return <div >
-          <h3 className="cover-heading">Questions</h3>
-          <div className="col-12 question-list">
-            {questions.map((question) => <Question question={question} onDeleteClicked={onDeleteClicked} key={question.text}></Question>)}
-          </div>
-        </div>;
+  let questionList;
+  if(questions.length !== 0){
+    let questionList = questions.map((question) => <Question question={question} onDeleteClicked={onDeleteClicked} key={question.text}></Question>)
+    return <div >
+            <h3 className="cover-heading">Questions</h3>
+            <div className="col-12 question-list">
+              {questionList}
+            </div>
+          </div>;
+  }else{
+    return <></>
+  }
 }
 function Question({question,onDeleteClicked}){
   return <div className="row">
@@ -146,7 +152,7 @@ class NewQuestionForm extends React.Component{
   render(){
           return <form onSubmit={this.handleSubmit} className="question-from">
             <h3>New question</h3>
-            <div className="form-group">
+            <div className="form-group row">
               {/* <label htmlFor="newQuestionText">The new question</label> */}
               <input type="text" 
                 className="form-control" 
@@ -178,7 +184,7 @@ function Option({handleChange, handleOnInput, handleInvalid, index, value}){
   return <div className="col-10">
     <label htmlFor={inputId}></label>
     <input  type="text" 
-            className="form-control option-input" 
+            className="form-control option-input float-left" 
             id={inputId}  
             placeholder={placeholder} 
             value={value} 

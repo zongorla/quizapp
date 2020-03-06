@@ -4,7 +4,11 @@ const key = "gameData"
 const defaultValue = undefined;
 const storage = {
     save: (newState) => {
-        localStorage.setItem(key,JSON.stringify(newState));
+        try{
+            localStorage.setItem(key,JSON.stringify(newState));
+        }catch(e){
+            console.log("Error saving state",e);
+        }
     },
     load: (isValid) => {
         const stored = localStorage.getItem(key);
